@@ -3,7 +3,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Literal
 
-from pydantic import PositiveInt
+from pydantic import NonNegativeInt, PositiveInt
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -12,8 +12,17 @@ class Settings(BaseSettings):
 
     redis_url: str = "redis://localhost:6379/0"
     stream_name: str = "docs:jobs"
+    stream_max_length: PositiveInt = 10_000
     consumer_group: str = "parsers"
+    document_ttl_seconds: PositiveInt = 7 * 24 * 60 * 60
+    upload_dir: Path = Path("data/uploads")
+    max_files_per_upload: PositiveInt = 20
+    max_upload_size_bytes: PositiveInt = 50 * 1024 * 1024
+    dead_letter_stream: str = "docs:jobs:dlq"
     worker_block_ms: PositiveInt = 5000
+    worker_concurrency: PositiveInt = 4
+    reclaim_idle_ms: NonNegativeInt = 60_000
+    max_deliveries: PositiveInt = 3
     worker_heartbeat_path: Path = (
         Path(tempfile.gettempdir()) / "docparser-worker.heartbeat"
     )
