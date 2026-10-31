@@ -10,7 +10,7 @@ from redis.asyncio.client import Pipeline
 from redis.typing import EncodableT, FieldT
 
 from docparser.config import Settings
-from docparser.models import Document, DocumentStatus, Page, ParserType
+from docparser.models import CachedResult, Document, DocumentStatus, Page, ParserType
 
 type HashFields = dict[FieldT, EncodableT]
 
@@ -72,18 +72,18 @@ class DocumentRepository:
         raw = await self._redis.get(_pages_key(document_id))
         return _PAGES.validate_json(raw) if raw else []
 
-    async def get_cached_pages(
+    async def get_cached_result(
         self, sha256: str, parser: ParserType
-    ) -> list[Page] | None:
+    ) -> CachedResult | None:
         raw = await self._redis.get(_cache_key(sha256, parser))
-        return _PAGES.validate_json(raw) if raw else None
+        return CachedResult.model_validate_json(raw) if raw else None
 
-    async def cache_pages(
-        self, sha256: str, parser: ParserType, pages: Sequence[Page]
+    async def cache_result(
+        self, sha256: str, parser: ParserType, result: CachedResult
     ) -> None:
         await self._redis.set(
             _cache_key(sha256, parser),
-            _PAGES.dump_json(list(pages)),
+            result.model_dump_json(),
             ex=self._settings.document_ttl_seconds,
         )
 
@@ -93,15 +93,28 @@ class DocumentRepository:
     async def mark_failed(self, document_id: UUID, error: str) -> None:
         await self._update(document_id, DocumentStatus.FAILED, {"error": error})
 
-    async def mark_done(self, document_id: UUID, pages: Sequence[Page]) -> None:
+    async def save_pages(self, document_id: UUID, pages: Sequence[Page]) -> None:
         ttl = self._settings.document_ttl_seconds
         async with self._redis.pipeline(transaction=True) as pipe:
             pipe.set(_pages_key(document_id), _PAGES.dump_json(list(pages)), ex=ttl)
             self._queue_update(
-                pipe, document_id, DocumentStatus.DONE, {"page_count": len(pages)}
+                pipe,
+                document_id,
+                DocumentStatus.SUMMARIZING,
+                {"page_count": len(pages)},
             )
             pipe.expire(_document_key(document_id), ttl)
             await pipe.execute()
+
+    async def mark_done(
+        self, document_id: UUID, *, summary: str | None, summary_error: str | None
+    ) -> None:
+        fields: HashFields = {}
+        if summary is not None:
+            fields["summary"] = summary
+        if summary_error is not None:
+            fields["summary_error"] = summary_error
+        await self._update(document_id, DocumentStatus.DONE, fields)
 
     async def _update(
         self, document_id: UUID, status: DocumentStatus, fields: HashFields

@@ -44,7 +44,7 @@ services:
 
   worker:
     <<: *app
-    command: ["python", "-m", "docparser.worker"]
+    command: ["python", "-m", "docparser.worker.main"]
     deploy:
       replicas: 2
     healthcheck:

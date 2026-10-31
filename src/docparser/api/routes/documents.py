@@ -6,8 +6,15 @@ from uuid import UUID, uuid4
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile, status
 from redis.exceptions import RedisError
 
-from docparser.api.deps import FileStoreDep, RepositoryDep, SettingsDep
+from docparser.api.deps import (
+    DocumentIdsDep,
+    FileStoreDep,
+    RepositoryDep,
+    SettingsDep,
+)
+from docparser.storage.repository import DocumentRepository
 from docparser.models import Document, DocumentDetail, DocumentStatus, ParserType
+from docparser.parsers import available_parsers
 
 router = APIRouter(prefix="/api", tags=["documents"])
 
@@ -25,6 +32,11 @@ async def upload_documents(
     file_store: FileStoreDep,
     parser: Annotated[ParserType, Form()] = ParserType.PYPDF,
 ) -> list[Document]:
+    if parser not in available_parsers(settings):
+        raise HTTPException(
+            status.HTTP_422_UNPROCESSABLE_CONTENT,
+            f"Parser {parser} is not available: GEMINI_API_KEY is not set",
+        )
     if len(files) > settings.max_files_per_upload:
         raise HTTPException(
             status.HTTP_422_UNPROCESSABLE_CONTENT,
@@ -55,18 +67,35 @@ async def upload_documents(
     return documents
 
 
+@router.get("/documents")
+async def get_documents(
+    document_ids: DocumentIdsDep, repository: RepositoryDep
+) -> list[DocumentDetail]:
+    details = [await _detail(repository, document_id) for document_id in document_ids]
+    return [detail for detail in details if detail is not None]
+
+
 @router.get("/documents/{document_id}")
 async def get_document(document_id: UUID, repository: RepositoryDep) -> DocumentDetail:
+    detail = await _detail(repository, document_id)
+    if detail is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Document not found")
+    return detail
+
+
+async def _detail(
+    repository: DocumentRepository, document_id: UUID
+) -> DocumentDetail | None:
     document = await repository.get(document_id)
     if document is None:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "Document not found")
+        return None
     pages = await repository.get_pages(document_id)
     return DocumentDetail.model_validate({**document.model_dump(), "pages": pages})
 
 
 @router.get("/parsers")
-async def list_parsers() -> list[ParserType]:
-    return list(ParserType)
+async def list_parsers(settings: SettingsDep) -> list[ParserType]:
+    return available_parsers(settings)
 
 
 async def _ensure_pdf_within_limit(upload: UploadFile, max_bytes: int) -> None:

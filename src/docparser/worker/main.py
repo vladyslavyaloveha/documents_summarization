@@ -9,6 +9,7 @@ from collections.abc import Awaitable, Callable
 from redis.asyncio import Redis
 
 from docparser.config import Settings, get_settings
+from docparser.llm.summarizer import build_summarizer
 from docparser.log import configure_logging
 from docparser.queue import (
     StreamMessage,
@@ -148,8 +149,14 @@ async def main() -> None:
     settings = get_settings()
     configure_logging(settings.log_level)
     redis = create_redis(settings)
+    summarizer = build_summarizer(settings)
+    if summarizer is None:
+        logger.warning("GEMINI_API_KEY is not set: documents get no summary")
     processor = DocumentProcessor(
-        DocumentRepository(redis, settings), FileStore(settings.upload_dir), settings
+        DocumentRepository(redis, settings),
+        FileStore(settings.upload_dir),
+        settings,
+        summarizer,
     )
     worker = Worker(
         redis,
@@ -166,3 +173,7 @@ async def main() -> None:
         await worker.run()
     finally:
         await redis.aclose()
+
+
+if __name__ == "__main__":
+    asyncio.run(main())

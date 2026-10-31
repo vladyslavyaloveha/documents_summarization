@@ -3,7 +3,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Literal
 
-from pydantic import NonNegativeInt, PositiveInt
+from pydantic import NonNegativeInt, PositiveInt, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -23,6 +23,11 @@ class Settings(BaseSettings):
     worker_concurrency: PositiveInt = 4
     reclaim_idle_ms: NonNegativeInt = 60_000
     max_deliveries: PositiveInt = 3
+    gemini_api_key: SecretStr | None = None
+    gemini_model: str = "gemini-3.1-flash-lite"
+    gemini_pages_per_chunk: PositiveInt = 10
+    summary_max_chars_per_call: PositiveInt = 400_000
+    summary_chunk_overlap_chars: NonNegativeInt = 2_000
     worker_heartbeat_path: Path = (
         Path(tempfile.gettempdir()) / "docparser-worker.heartbeat"
     )
