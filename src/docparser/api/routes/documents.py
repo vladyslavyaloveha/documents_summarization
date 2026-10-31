@@ -12,9 +12,9 @@ from docparser.api.deps import (
     RepositoryDep,
     SettingsDep,
 )
-from docparser.storage.repository import DocumentRepository
 from docparser.models import Document, DocumentDetail, DocumentStatus, ParserType
 from docparser.parsers import available_parsers
+from docparser.storage.repository import DocumentRepository
 
 router = APIRouter(prefix="/api", tags=["documents"])
 

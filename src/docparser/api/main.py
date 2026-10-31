@@ -5,7 +5,7 @@ from typing import Final
 from fastapi import FastAPI
 from starlette.middleware.body_limit import RequestBodyLimitMiddleware
 
-from docparser.api.routes import documents, health
+from docparser.api.routes import documents, events, health
 from docparser.config import Settings, get_settings
 from docparser.log import configure_logging
 from docparser.redis_client import create_redis
@@ -35,6 +35,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     )
     app.include_router(health.router)
     app.include_router(documents.router)
+    app.include_router(events.router)
     return app
 
 
