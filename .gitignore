@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+build/
+dist/
+*.egg-info/
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Local runtime data (uploads when running outside Docker)
+data/
+
+# Frontend
+node_modules/
+frontend/dist/
+
+# Claude Code personal settings
+.claude/settings.local.json
+
+# JetBrains user-specific files
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/usage.statistics.xml
+.idea/dictionaries/
+.idea/shelf/
