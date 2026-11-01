@@ -14,6 +14,8 @@ export interface Document {
   page_count: number | null;
   summary: string | null;
   summary_error: string | null;
+  language: string | null;
+  mixed_languages: string | null;
   created_at: string;
 }
 

@@ -33,7 +33,16 @@ export function DocumentCard({ document }: { document: DocumentDetail }) {
 
       {document.status === "done" && (
         <section className="summary">
-          <h3>Summary</h3>
+          <h3>
+            Summary
+            {document.summary && document.language && (
+              <span className="summary-language">
+                {" · "}
+                {document.language}
+                {document.mixed_languages && ` (mixed: ${document.mixed_languages})`}
+              </span>
+            )}
+          </h3>
           {document.summary ? (
             <div className="markdown">
               <MarkdownView>{document.summary}</MarkdownView>

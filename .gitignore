@@ -25,9 +25,5 @@ frontend/dist/
 # Claude Code personal settings
 .claude/settings.local.json
 
-# JetBrains user-specific files
-.idea/workspace.xml
-.idea/tasks.xml
-.idea/usage.statistics.xml
-.idea/dictionaries/
-.idea/shelf/
+# JetBrains
+.idea/

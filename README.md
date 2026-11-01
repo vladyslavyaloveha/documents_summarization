@@ -6,7 +6,13 @@ Upload one or more PDFs, choose a parser (PyPDF or Google Gemini), and get per-p
 
 ![Demo](demo/demo.gif)
 
-A scanned 1914 letter: PyPDF finds no text layer, Gemini transcribes it and writes the summary. The full recording, [demo/demo.mp4](demo/demo.mp4), also shows live status updates, readable errors for encrypted and non-PDF files, and an instant result from the cache on a repeated upload.
+A scanned 1914 letter: PyPDF finds no text layer, Gemini transcribes it and writes the summary.
+
+![Summary language](demo/languages.gif)
+
+German and Italian documents: the language is detected per page and each summary is written in it (`Summary · DE`, `Summary · IT`). The wait while Gemini works is cut out.
+
+The full recording, [demo/demo.mp4](demo/demo.mp4), also shows live status updates, readable errors for encrypted and non-PDF files, an instant result from the cache on a repeated upload, and the language example.
 
 ## Architecture
 
@@ -18,7 +24,7 @@ browser ── nginx :8080 ──/api──► FastAPI api :8000 ──XADD─�
 
 - API: FastAPI. Uploads go to a shared volume, documents and jobs go to Redis in one transaction (`202 Accepted`).
 - Workers: Redis Streams consumer group with crash recovery (`XAUTOCLAIM`), lease renewal, dead-letter stream, result cache by SHA-256.
-- Parsers: `pypdf` (text) and `gemini` (`gemini-3.1-flash-lite`, Markdown, works on scans and images). Summaries: Gemini via Pydantic AI.
+- Parsers: `pypdf` (text) and `gemini` (`gemini-3.1-flash-lite`, Markdown, works on scans and images). Summaries: Gemini via Pydantic AI, written in the document's language. The language is detected per page with fastText (`fast-langdetect`, offline `lite` model) and weighted by text length; near ties go to the language that appears first (the card shows `DE (mixed: DE, IT)`), and documents with no usable text fall back to `EN`.
 - Frontend: Vite + React + TypeScript, live updates over Server-Sent Events with polling fallback.
 
 ## Run
@@ -42,7 +48,7 @@ Open http://localhost:8080, pick files, pick a parser, press **Upload**. Each fi
 
 | # | Files | Parser | What you should see |
 |---|---|---|---|
-| 1 | `text.pdf`, `cyrillic.pdf` | pypdf | Both *Done* in a few seconds; 8 and 10 pages; English and Russian summaries of the Universal Declaration of Human Rights |
+| 1 | `text.pdf`, `german.pdf`, `italian.pdf` | pypdf | All *Done* in a few seconds; 8, 6 and 9 pages; the Universal Declaration of Human Rights summarized in English, German and Italian, each in the document's own language |
 | 2 | `scanned.pdf` | pypdf | *Done*, page 1 shows "No text", summary: "No extractable text to summarize; try the Gemini parser" |
 | 3 | `scanned.pdf` | gemini | Page 1 is the transcribed 1914 Western Union letter to Theodore Roosevelt; the summary describes the letter |
 | 4 | `image.pdf` | pypdf / gemini | pypdf: only the title and caption. gemini: the comic's speech bubbles ("WE ARE HERE AT LAST…") |

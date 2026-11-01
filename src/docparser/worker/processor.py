@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from collections.abc import Sequence
 from uuid import UUID
@@ -5,6 +6,7 @@ from uuid import UUID
 from pydantic_ai.exceptions import ModelHTTPError
 
 from docparser.config import Settings
+from docparser.language import detect_language
 from docparser.llm.summarizer import Summarizer
 from docparser.models import CachedResult, DocumentStatus, Page, ParserType
 from docparser.parsers import get_parser
@@ -65,16 +67,20 @@ class DocumentProcessor:
             pages, summary = cached.pages, cached.summary
 
         await self._repository.save_pages(document_id, pages)
+        language = await asyncio.to_thread(detect_language, pages)
         summary_error = None
         if summary is None:
             summary, summary_error = await self._summarize(
-                document_id, document.parser, pages
+                document_id, document.parser, pages, language.code
             )
         await self._repository.cache_result(
             document.sha256, document.parser, CachedResult(pages=pages, summary=summary)
         )
         await self._repository.mark_done(
-            document_id, summary=summary, summary_error=summary_error
+            document_id,
+            summary=summary,
+            summary_error=summary_error,
+            language=language if summary is not None else None,
         )
         await self._file_store.delete(document_id)
         logger.info("Document %s done: %d pages", document_id, len(pages))
@@ -104,7 +110,11 @@ class DocumentProcessor:
         return None
 
     async def _summarize(
-        self, document_id: UUID, parser: ParserType, pages: Sequence[Page]
+        self,
+        document_id: UUID,
+        parser: ParserType,
+        pages: Sequence[Page],
+        language: str,
     ) -> tuple[str | None, str | None]:
         if self._summarizer is None:
             return None, "Summarization is disabled: GEMINI_API_KEY is not set"
@@ -114,7 +124,7 @@ class DocumentProcessor:
                 return None, "No extractable text to summarize; try the Gemini parser"
             return None, "No text found in the document to summarize"
         try:
-            return await self._summarizer.summarize(text), None
+            return await self._summarizer.summarize(text, language), None
         except ModelHTTPError as exc:
             logger.warning("Gemini API error for document %s: %s", document_id, exc)
             return None, f"Gemini API error (HTTP {exc.status_code})"

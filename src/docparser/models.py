@@ -33,6 +33,8 @@ class Document(BaseModel):
     page_count: int | None = None
     summary: str | None = None
     summary_error: str | None = None
+    language: str | None = None
+    mixed_languages: str | None = None
     created_at: datetime
     updated_at: datetime
 

@@ -11,6 +11,7 @@ from redis.asyncio.client import Pipeline
 from redis.typing import EncodableT, FieldT
 
 from docparser.config import Settings
+from docparser.language import DetectedLanguage
 from docparser.models import CachedResult, Document, DocumentStatus, Page, ParserType
 
 type HashFields = dict[FieldT, EncodableT]
@@ -116,11 +117,20 @@ class DocumentRepository:
             await pipe.execute()
 
     async def mark_done(
-        self, document_id: UUID, *, summary: str | None, summary_error: str | None
+        self,
+        document_id: UUID,
+        *,
+        summary: str | None,
+        summary_error: str | None,
+        language: DetectedLanguage | None = None,
     ) -> None:
         fields: HashFields = {}
         if summary is not None:
             fields["summary"] = summary
+        if language is not None:
+            fields["language"] = language.code
+            if language.mixed:
+                fields["mixed_languages"] = ", ".join(language.mixed)
         if summary_error is not None:
             fields["summary_error"] = summary_error
         await self._update(document_id, DocumentStatus.DONE, fields)
