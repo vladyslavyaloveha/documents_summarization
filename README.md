@@ -14,6 +14,28 @@ German and Italian documents: the language is detected per page and each summary
 
 The full recording, [demo/demo.mp4](demo/demo.mp4), also shows live status updates, readable errors for encrypted and non-PDF files, an instant result from the cache on a repeated upload, and the language example.
 
+## Scope
+
+**Minimal scope:**
+
+1. Async FastAPI backend serving concurrent requests
+2. PDF upload and parsing with PyPDF
+3. Asynchronous processing through a Redis Streams queue (consumer group, worker processes)
+4. Summaries with `gemini-3.1-flash-lite`
+5. Gemini as a second parser (PDF → Markdown, works on scans), everything wrapped in Docker Compose
+6. A simple React upload page: choose files and a parser, see per-page content and the summary of each file
+
+**Additional features:**
+
+- Queue reliability: crash recovery with `XAUTOCLAIM`, lease renewal, dead-letter stream, worker healthchecks
+- Result cache by SHA-256: a repeated upload is served instantly
+- Long documents: map-reduce summarization, page-by-page Gemini parsing in chunks
+- Summary language detected per page (fastText), shown on the card
+- Prompt-injection guard: document text is passed as data inside tags
+- Frontend: live updates over SSE (polling kept as a fallback), nginx as the reverse proxy, polished TypeScript UI
+- An `examples/` corpus of edge-case PDFs (scans, broken fonts, encrypted, corrupted, decompression bomb, hidden prompt injection) with expected results, unit/integration/live tests
+- Demo recordings
+
 ## Architecture
 
 ```
