@@ -9,7 +9,6 @@
 .env
 .env.*
 data
-docs
 tests
 scripts
 frontend

@@ -93,4 +93,4 @@ Environment variables (see `src/docparser/config.py` for all of them):
 
 ## Adding a parser
 
-Subclass `BaseParser` (`src/docparser/parsers/base.py`), add a value to `ParserType` (`src/docparser/models.py`) and a `case` in `get_parser()` (`src/docparser/parsers/__init__.py`). See ADR-0005.
+Subclass `BaseParser` (`src/docparser/parsers/base.py`), add a value to `ParserType` (`src/docparser/models.py`) and a `case` in `get_parser()` (`src/docparser/parsers/__init__.py`).
