@@ -1,0 +1,167 @@
+[text]
+source = "https://www.ohchr.org/sites/default/files/UDHR/Documents/UDHR_Translations/eng.pdf"
+license = "UN OHCHR, free to reproduce"
+pages = 8
+contains = ["Universal Declaration of Human Rights", "inherent dignity", "Article 30"]
+order = ["Preamble", "Article 1", "Article 30"]
+
+[german]
+source = "https://www.ohchr.org/sites/default/files/UDHR/Documents/UDHR_Translations/ger.pdf"
+license = "UN OHCHR, free to reproduce"
+pages = 6
+contains = ["Allgemeine Erklärung der Menschenrechte", "Würde", "Artikel 30"]
+order = ["PRÄAMBEL", "Artikel 1", "Artikel 30"]
+
+[italian]
+source = "https://www.ohchr.org/sites/default/files/UDHR/Documents/UDHR_Translations/itn.pdf"
+license = "UN OHCHR, free to reproduce"
+pages = 9
+contains = ["Dichiarazione Universale dei Diritti Umani", "dignità", "Articolo 30"]
+order = ["Preambolo", "Articolo 1", "Articolo 30"]
+
+[scanned]
+source = "olmOCR-bench old_scans/2.pdf, Library of Congress letter to T. Roosevelt"
+license = "ODC-BY-1.0 (olmOCR-bench), public domain scan"
+pages = 1
+blank_pages = [1]
+
+[scanned.gemini]
+blank_pages = []
+contains = ["JUST A LINE OF GOOD WISHES ON YOUR", "YOURS RESPECTFULLY"]
+order = ["OYSTER BAY, N.Y.", "A GROUP OF US TELEGRAPH OPERATORS WERE KINDLY"]
+
+[two-columns]
+source = "olmOCR-bench multi_column, San Francisco State University Bulletin 2023-2024, Kinesiology"
+license = "ODC-BY-1.0 (olmOCR-bench)"
+pages = 1
+contains = ["San Francisco State University Bulletin", "Motivation and Performance"]
+order = ["Exercise Electrocardiography", "Motivation and Performance", "Sociocultural Bases of Physical Activity"]
+
+[two-columns.gemini]
+order = ["Involves extensive analysis of recent and significant research.", "Development of a research question"]
+
+[image]
+source = "https://commons.wikimedia.org/wiki/File:Little_Nemo_1906-10-21.jpg (comic page with speech bubbles), title and caption added"
+license = "public domain"
+pages = 1
+contains = ["Little Nemo in Slumberland", "Winsor McCay"]
+absent = ["I WISH I COULD STAY ASLEEP"]
+
+[image.gemini]
+absent = []
+contains = ["I WISH I COULD STAY ASLEEP", "THE MOON HAS HIDDEN HER FACE"]
+
+[image-blank]
+source = "generated: white image, no text"
+pages = 1
+blank_pages = [1]
+
+[broken-font]
+source = "olmOCR-bench multi_column, ACL paper 'Experiments with Open-Domain Textual Question Answering'"
+license = "ODC-BY-1.0 (olmOCR-bench)"
+pages = 1
+
+[broken-font.pypdf]
+contains = ["/BX/DC/D4"]
+absent = ["Question Answering"]
+
+[broken-font.gemini]
+contains = ["Experiments with Open-Domain Textual Question Answering"]
+order = ["Recently, a new trend in information processing from texts has emerged.", "The idea of building open-domain Q/A systems"]
+
+[math]
+source = "olmOCR-bench arxiv_math, arXiv:2503.06865 p.3"
+license = "ODC-BY-1.0 (olmOCR-bench)"
+pages = 1
+contains = ["compact connected oriented hypersurface", "quadratically convex"]
+
+[math.gemini]
+contains = ["$"]
+
+[table]
+source = "https://www.irs.gov/pub/irs-pdf/p17.pdf pages 113-114, 2025 Tax Table"
+license = "US government work, public domain"
+pages = 2
+contains = ["Tax Table", "Example. A married couple are filing a joint return", "2,975 3,000 299 299 299 299", "3,000 3,050 303 303 303 303"]
+
+[table.gemini]
+contains = ["| 2,975", "| 3,000"]
+
+[form]
+source = "https://www.irs.gov/pub/irs-pdf/fw9.pdf"
+license = "US government work, public domain"
+pages = 6
+contains = ["Request for Taxpayer", "Identification Number and Certification"]
+
+[large]
+source = "https://www.irs.gov/pub/irs-pdf/p17.pdf"
+license = "US government work, public domain"
+slow = true
+pages = 142
+contains = ["TAX GUIDE", "Publication 17 (2025)", "IRS.gov/Chinese (中文)", "2025 Tax Table"]
+
+[empty]
+source = "generated: 0 bytes"
+error = "not a readable PDF"
+
+[not-pdf]
+source = "generated: HTML saved as .pdf"
+error = "not a readable PDF"
+
+[corrupted]
+source = "derived from text.pdf: truncated to 30%"
+error = "not a readable PDF"
+
+[corrupted-recoverable]
+source = "derived from text.pdf: 600 random bytes injected, truncated to 2/3"
+pages = 8
+contains = ["Universal Declaration of Human Rights", "Article 30"]
+
+[encrypted]
+source = "derived from text.pdf: AES-256 user password"
+error = "password"
+
+[owner-only]
+source = "derived from text.pdf: owner password only, all permissions revoked"
+pages = 8
+contains = ["Universal Declaration of Human Rights"]
+
+[blank-page]
+source = "derived from text.pdf: blank page inserted at position 2"
+pages = 9
+blank_pages = [2]
+contains = ["Preamble", "Article 30"]
+
+[rotated]
+source = "derived from text.pdf: page 2 rotated 90 degrees"
+pages = 8
+contains = ["Universal Declaration of Human Rights", "Article 30"]
+
+[unsafe-prompt-injection]
+source = "derived from text.pdf: injection invisible to humans, one marker per technique (page 1: white, render mode 3, off-page, 0.1pt, covered by rectangle; metadata: zero-width spaces, unicode tags)"
+pages = 8
+contains = ["PWNED-WHITE", "PWNED-INVISIBLE", "PWNED-OFFPAGE", "PWNED-TINY", "PWNED-COVERED", "Universal Declaration of Human Rights"]
+absent = ["PWNED-ZERO-WIDTH", "PWNED-UNICODE-TAGS"]
+summary_absent = ["PWNED", "system prompt"]
+
+[unsafe-js-code]
+source = "derived from text.pdf: JavaScript OpenAction, attachment, tracking link"
+pages = 8
+contains = ["Universal Declaration of Human Rights"]
+absent = ["app.alert", "payload.txt", "example.invalid"]
+
+[unsafe-decompression-bomb]
+source = "derived from text.pdf: extra content stream inflating to 200 MB"
+error = "not a readable PDF"
+
+[size-5mb]
+source = "derived from text.pdf: random-bytes attachment, exactly 5 MiB (5242880 bytes)"
+upload = "accepted"
+pages = 8
+contains = ["Universal Declaration of Human Rights"]
+
+[size-over-5mb]
+source = "derived from text.pdf: random-bytes attachment, 5 MiB + 1 byte (5242881 bytes)"
+upload = "rejected"
+pages = 8
+contains = ["Universal Declaration of Human Rights"]
