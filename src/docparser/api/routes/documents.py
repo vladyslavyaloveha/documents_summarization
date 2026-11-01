@@ -103,7 +103,7 @@ async def _ensure_pdf_within_limit(upload: UploadFile, max_bytes: int) -> None:
     if upload.size is not None and upload.size > max_bytes:
         raise HTTPException(
             status.HTTP_413_CONTENT_TOO_LARGE,
-            f"{name} exceeds the {max_bytes} byte limit",
+            f"{name} exceeds the {max_bytes // 1024 // 1024} MB limit",
         )
     header = await upload.read(PDF_HEADER_SEARCH_BYTES)
     await upload.seek(0)

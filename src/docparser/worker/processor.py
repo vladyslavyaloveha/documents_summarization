@@ -67,7 +67,9 @@ class DocumentProcessor:
         await self._repository.save_pages(document_id, pages)
         summary_error = None
         if summary is None:
-            summary, summary_error = await self._summarize(document_id, pages)
+            summary, summary_error = await self._summarize(
+                document_id, document.parser, pages
+            )
         await self._repository.cache_result(
             document.sha256, document.parser, CachedResult(pages=pages, summary=summary)
         )
@@ -102,13 +104,15 @@ class DocumentProcessor:
         return None
 
     async def _summarize(
-        self, document_id: UUID, pages: Sequence[Page]
+        self, document_id: UUID, parser: ParserType, pages: Sequence[Page]
     ) -> tuple[str | None, str | None]:
         if self._summarizer is None:
             return None, "Summarization is disabled: GEMINI_API_KEY is not set"
         text = "\n\n".join(page.markdown for page in pages).strip()
         if not text:
-            return None, "No extractable text to summarize; try the Gemini parser"
+            if parser == ParserType.PYPDF:
+                return None, "No extractable text to summarize; try the Gemini parser"
+            return None, "No text found in the document to summarize"
         try:
             return await self._summarizer.summarize(text), None
         except ModelHTTPError as exc:

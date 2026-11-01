@@ -1,10 +1,11 @@
 import json
+import logging
 from collections.abc import Sequence
 from datetime import UTC, datetime
 from typing import cast
 from uuid import UUID
 
-from pydantic import TypeAdapter
+from pydantic import TypeAdapter, ValidationError
 from redis.asyncio import Redis
 from redis.asyncio.client import Pipeline
 from redis.typing import EncodableT, FieldT
@@ -13,6 +14,8 @@ from docparser.config import Settings
 from docparser.models import CachedResult, Document, DocumentStatus, Page, ParserType
 
 type HashFields = dict[FieldT, EncodableT]
+
+logger = logging.getLogger(__name__)
 
 _PAGES = TypeAdapter(list[Page])
 
@@ -30,7 +33,7 @@ def _pages_key(document_id: UUID) -> str:
 
 
 def _cache_key(sha256: str, parser: ParserType) -> str:
-    return f"result:{parser.value}:{sha256}"
+    return f"result:v2:{parser.value}:{sha256}"
 
 
 def _now() -> str:
@@ -76,7 +79,13 @@ class DocumentRepository:
         self, sha256: str, parser: ParserType
     ) -> CachedResult | None:
         raw = await self._redis.get(_cache_key(sha256, parser))
-        return CachedResult.model_validate_json(raw) if raw else None
+        if not raw:
+            return None
+        try:
+            return CachedResult.model_validate_json(raw)
+        except ValidationError:
+            logger.warning("Ignoring unreadable cache entry for %s", sha256)
+            return None
 
     async def cache_result(
         self, sha256: str, parser: ParserType, result: CachedResult

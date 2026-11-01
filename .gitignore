@@ -18,9 +18,6 @@ dist/
 .env.*
 !.env.example
 
-# Local runtime data (uploads when running outside Docker)
-data/
-
 # Frontend
 node_modules/
 frontend/dist/

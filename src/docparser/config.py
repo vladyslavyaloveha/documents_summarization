@@ -16,8 +16,8 @@ class Settings(BaseSettings):
     consumer_group: str = "parsers"
     document_ttl_seconds: PositiveInt = 7 * 24 * 60 * 60
     upload_dir: Path = Path("data/uploads")
-    max_files_per_upload: PositiveInt = 20
-    max_upload_size_bytes: PositiveInt = 50 * 1024 * 1024
+    max_files_per_upload: PositiveInt = 5
+    max_upload_size_bytes: PositiveInt = 5 * 1024 * 1024
     dead_letter_stream: str = "docs:jobs:dlq"
     worker_block_ms: PositiveInt = 5000
     worker_concurrency: PositiveInt = 4
@@ -25,7 +25,8 @@ class Settings(BaseSettings):
     max_deliveries: PositiveInt = 3
     gemini_api_key: SecretStr | None = None
     gemini_model: str = "gemini-3.1-flash-lite"
-    gemini_pages_per_chunk: PositiveInt = 10
+    gemini_pages_per_chunk: PositiveInt = 5
+    gemini_max_concurrency: PositiveInt = 2
     summary_max_chars_per_call: PositiveInt = 400_000
     summary_chunk_overlap_chars: NonNegativeInt = 2_000
     worker_heartbeat_path: Path = (

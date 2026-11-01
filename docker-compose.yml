@@ -50,10 +50,20 @@ services:
     healthcheck:
       test: ["CMD", "python", "-m", "docparser.worker.healthcheck"]
       interval: 10s
-      timeout: 5s
+      timeout: 10s
       retries: 3
       start_period: 15s
 
+  frontend:
+    build: ./frontend
+    ports:
+      - "127.0.0.1:8080:8080"
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+
+
 volumes:
-  redis-data:
   uploads:
+  redis-data:

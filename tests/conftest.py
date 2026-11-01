@@ -22,6 +22,8 @@ type ApiClientFactory = Callable[[Settings], AbstractAsyncContextManager[AsyncCl
 @pytest.fixture
 def settings(tmp_path: Path) -> Settings:
     return Settings(
+        _env_file=None,
+        gemini_api_key=None,
         upload_dir=tmp_path / "uploads",
         worker_heartbeat_path=tmp_path / "heartbeat",
         worker_block_ms=10,

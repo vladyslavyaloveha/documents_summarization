@@ -19,9 +19,9 @@ def build_gemini_model(settings: Settings) -> GoogleModel | None:
         api_key=settings.gemini_api_key.get_secret_value(),
         retry_options=HttpRetryOptions(
             attempts=5,
-            initial_delay=0.5,
-            max_delay=5.0,
-            exp_base=1.0,
+            initial_delay=5.0,
+            max_delay=60.0,
+            exp_base=2.0,
             http_status_codes=RETRYABLE_STATUS_CODES,
         ),
     )
